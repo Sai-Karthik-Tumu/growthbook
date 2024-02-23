@@ -1466,6 +1466,7 @@ export async function getFeatures(
   req: AuthRequest<unknown, unknown, { project?: string }>,
   res: Response
 ) {
+  // console.log("getFeature")
   const context = getContextFromReq(req);
 
   let project = "";

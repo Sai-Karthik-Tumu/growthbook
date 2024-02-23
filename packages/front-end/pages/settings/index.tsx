@@ -676,7 +676,18 @@ const GeneralSettingsPage = (): React.ReactElement => {
               </Link>
             </div>
           )}
-
+          <div className="bg-white p-3 border position-relative my-3">
+            <h3>Import from another service</h3>
+            <p>
+              Import your data from another feature flag and/or experimentation
+              service.
+            </p>
+            <Link href="/importing">
+              <a className="btn btn-primary">
+                <FaUpload /> Import feature flag(s) from other projects
+              </a>
+            </Link>
+          </div>
           <div className="my-3 bg-white p-3 border">
             <div className="row">
               <div className="col-sm-3">
