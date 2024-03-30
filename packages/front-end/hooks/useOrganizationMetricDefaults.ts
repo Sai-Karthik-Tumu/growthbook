@@ -15,6 +15,8 @@ import useOrgSettings from "./useOrgSettings";
 
 const defaultMaxPercentChange = 0.5;
 const defaultMinPercentChange = 0.005;
+const defaultMaxValueChange = 50;
+const defaultMinValueChange = 0.5;
 const defaultMinSampleSize = 150;
 
 const defaultMetricWindowSettings: MetricWindowSettings = {
@@ -32,6 +34,8 @@ const METRIC_DEFAULTS = {
   minimumSampleSize: defaultMinSampleSize,
   maxPercentageChange: defaultMaxPercentChange,
   minPercentageChange: defaultMinPercentChange,
+  maxValueChange: defaultMaxValueChange,
+  minValueChange: defaultMinValueChange,
   windowSettings: defaultMetricWindowSettings,
   cappingSettings: defaultMetricCappingSettings,
 };
@@ -51,6 +55,8 @@ type OrganizationMetricDefaults = {
     minimumSampleSize: number;
     maxPercentageChange: number;
     minPercentageChange: number;
+    maxValueChange: number;
+    minValueChange: number;
     windowSettings: MetricWindowSettings;
     cappingSettings: MetricCappingSettings;
   };
@@ -80,6 +86,22 @@ type OrganizationMetricDefaults = {
   }) => number;
 
   /**
+   * Returns the max percentage change for the provided metric,
+   * considering 0 (zero) as a valid value.
+   * @param metric
+   * @return number
+   */
+  getMaxValueChangeForMetric: (metric: { maxValueChange?: number }) => number;
+
+  /**
+   * Returns the min value change for the provided metric,
+   * considering 0 (zero) as a valid value.
+   * @param metric
+   * @return number
+   */
+  getMinValueChangeForMetric: (metric: { minValueChange?: number }) => number;
+
+  /**
    * Returns the minimum sample size for the provided metric,
    * considering 0 (zero) as a valid value.
    * @param metric
@@ -96,6 +118,8 @@ export type OrganizationSettingsWithMetricDefaults = Omit<
     minimumSampleSize: number;
     maxPercentageChange: number;
     minPercentageChange: number;
+    maxValueChange: number;
+    minValueChange: number;
     windowSettings: MetricWindowSettings;
     cappingSettings: MetricCappingSettings;
   };
@@ -142,6 +166,32 @@ export const useOrganizationMetricDefaults = (): OrganizationMetricDefaults => {
   );
 
   /**
+   * @link OrganizationMetricDefaults#getMaxValueChangeForMetric
+   */
+  const getMaxValueChangeForMetric = useCallback(
+    (metric: { maxValueChange?: number }): number => {
+      const value = metric.maxValueChange;
+      if (typeof value === "number") return value;
+
+      return metricDefaults.maxValueChange;
+    },
+    [metricDefaults]
+  );
+
+  /**
+   * @link OrganizationMetricDefaults#getMinValueChangeForMetric
+   */
+  const getMinValueChangeForMetric = useCallback(
+    (metric: { minValueChange?: number }): number => {
+      const value = metric.minValueChange;
+      if (typeof value === "number") return value;
+
+      return metricDefaults.minValueChange;
+    },
+    [metricDefaults]
+  );
+
+  /**
    * @link OrganizationMetricDefaults#getMinSampleSizeForMetric
    */
   const getMinSampleSizeForMetric = useCallback(
@@ -158,6 +208,8 @@ export const useOrganizationMetricDefaults = (): OrganizationMetricDefaults => {
     metricDefaults,
     getMinPercentageChangeForMetric,
     getMaxPercentageChangeForMetric,
+    getMaxValueChangeForMetric,
+    getMinValueChangeForMetric,
     getMinSampleSizeForMetric,
   };
 };

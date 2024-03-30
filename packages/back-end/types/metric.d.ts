@@ -70,6 +70,9 @@ export interface MetricInterface {
   loseRisk?: number;
   maxPercentChange?: number;
   minPercentChange?: number;
+  maxValueChange?: number;
+  minValueChange?: number;
+  useValue: boolean;
   minSampleSize?: number;
 
   regressionAdjustmentOverride?: boolean;

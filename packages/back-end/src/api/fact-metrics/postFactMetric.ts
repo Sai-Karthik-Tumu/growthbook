@@ -56,6 +56,9 @@ export async function getCreateMetricPropsFromBody(
       scopedSettings.metricDefaults.value.maxPercentageChange || 0,
     minPercentChange:
       scopedSettings.metricDefaults.value.minPercentageChange || 0,
+    maxValueChange: scopedSettings.metricDefaults.value.maxValueChange || 0,
+    minValueChange: scopedSettings.metricDefaults.value.minValueChange || 0,
+    useValue: scopedSettings.metricDefaults.value.useValue || false,
     minSampleSize: scopedSettings.metricDefaults.value.minimumSampleSize || 0,
     description: "",
     owner: "",

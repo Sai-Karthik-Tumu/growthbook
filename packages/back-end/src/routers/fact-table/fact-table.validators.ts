@@ -128,6 +128,9 @@ export const factMetricValidator = z
 
     maxPercentChange: z.number(),
     minPercentChange: z.number(),
+    maxValueChange: z.number(),
+    minValueChange: z.number(),
+    useValue: z.boolean(),
     minSampleSize: z.number(),
     winRisk: z.number(),
     loseRisk: z.number(),

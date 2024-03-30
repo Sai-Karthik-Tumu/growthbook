@@ -256,6 +256,8 @@ const MetricForm: FC<MetricFormProps> = ({
     getMinSampleSizeForMetric,
     getMinPercentageChangeForMetric,
     getMaxPercentageChangeForMetric,
+    getMaxValueChangeForMetric,
+    getMinValueChangeForMetric,
     metricDefaults,
   } = useOrganizationMetricDefaults();
 
@@ -338,6 +340,9 @@ const MetricForm: FC<MetricFormProps> = ({
       loseRisk: (current.loseRisk || defaultLoseRiskThreshold) * 100,
       maxPercentChange: getMaxPercentageChangeForMetric(current) * 100,
       minPercentChange: getMinPercentageChangeForMetric(current) * 100,
+      minValueChange: getMinValueChangeForMetric(current),
+      maxValueChange: getMaxValueChangeForMetric(current),
+      useValue: current.useValue || false,
       minSampleSize: getMinSampleSizeForMetric(current),
       regressionAdjustmentOverride:
         current.regressionAdjustmentOverride ?? false,
@@ -354,6 +359,7 @@ const MetricForm: FC<MetricFormProps> = ({
   const { apiCall, orgId } = useAuth();
 
   const type = form.watch("type");
+  const useValue = form.watch("useValue");
 
   const value = {
     name: form.watch("name"),
@@ -380,6 +386,7 @@ const MetricForm: FC<MetricFormProps> = ({
     regressionAdjustmentOverride: form.watch("regressionAdjustmentOverride"),
     regressionAdjustmentEnabled: form.watch("regressionAdjustmentEnabled"),
     regressionAdjustmentDays: form.watch("regressionAdjustmentDays"),
+    useValue: useValue,
   };
 
   // We want to show a warning when someone tries to create a metric for just the demo project
@@ -500,6 +507,9 @@ const MetricForm: FC<MetricFormProps> = ({
       loseRisk,
       maxPercentChange,
       minPercentChange,
+      maxValueChange,
+      minValueChange,
+      useValue,
       eventName,
       valueColumn,
       ...otherValues
@@ -512,6 +522,9 @@ const MetricForm: FC<MetricFormProps> = ({
       loseRisk: loseRisk / 100,
       maxPercentChange: maxPercentChange / 100,
       minPercentChange: minPercentChange / 100,
+      minValueChange,
+      maxValueChange,
+      useValue,
     };
 
     if (value.loseRisk < value.winRisk) return;
@@ -1271,28 +1284,70 @@ const MetricForm: FC<MetricFormProps> = ({
                   )
                 </small>
               </div>
-              <Field
-                label="Max Percent Change"
-                type="number"
-                step="any"
-                append="%"
-                {...form.register("maxPercentChange", { valueAsNumber: true })}
-                helpText={`An experiment that changes the metric by more than this percent will
-            be flagged as suspicious (default ${
-              metricDefaults.maxPercentageChange * 100
-            })`}
+              <Toggle
+                id={"useValue"}
+                value={!!form.watch("useValue")}
+                setValue={(value: boolean) => {
+                  form.setValue("useValue", value);
+                }}
+                label="Use Value"
               />
-              <Field
-                label="Min Percent Change"
-                type="number"
-                step="any"
-                append="%"
-                {...form.register("minPercentChange", { valueAsNumber: true })}
-                helpText={`An experiment that changes the metric by less than this percent will be
-            considered a draw (default ${
-              metricDefaults.minPercentageChange * 100
-            })`}
-              />
+
+              {useValue ? (
+                <>
+                  <Field
+                    label="Max Value Change"
+                    type="number"
+                    step="any"
+                    append="Value"
+                    {...form.register("maxValueChange", {
+                      valueAsNumber: true,
+                    })}
+                    helpText={`An experiment that changes the metric by more than this value will be flagged as suspicious (default ${
+                      metricDefaults.maxPercentageChange * 100
+                    })`}
+                  />
+                  <Field
+                    label="Min Value Change"
+                    type="number"
+                    step="any"
+                    append="Value"
+                    {...form.register("minValueChange", {
+                      valueAsNumber: true,
+                    })}
+                    helpText={`An experiment that changes the metric by less than this value will be considered a draw (default ${
+                      metricDefaults.minPercentageChange * 100
+                    })`}
+                  />
+                </>
+              ) : (
+                <>
+                  <Field
+                    label="Max Percent Change"
+                    type="number"
+                    step="any"
+                    append="%"
+                    {...form.register("maxPercentChange", {
+                      valueAsNumber: true,
+                    })}
+                    helpText={`An experiment that changes the metric by more than this percent will be flagged as suspicious (default ${
+                      metricDefaults.maxPercentageChange * 100
+                    })`}
+                  />
+                  <Field
+                    label="Min Percent Change"
+                    type="number"
+                    step="any"
+                    append="%"
+                    {...form.register("minPercentChange", {
+                      valueAsNumber: true,
+                    })}
+                    helpText={`An experiment that changes the metric by less than this percent will be considered a draw (default ${
+                      metricDefaults.minPercentageChange * 100
+                    })`}
+                  />
+                </>
+              )}
 
               <PremiumTooltip commercialFeature="regression-adjustment">
                 <label className="mb-1">

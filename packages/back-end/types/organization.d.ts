@@ -105,6 +105,9 @@ export interface MetricDefaults {
   minimumSampleSize?: number;
   maxPercentageChange?: number;
   minPercentageChange?: number;
+  maxValueChange?: number;
+  minValueChange?: number;
+  useValue?: boolean;
   windowSettings?: MetricWindowSettings;
   cappingSettings?: MetricCappingSettings;
 }

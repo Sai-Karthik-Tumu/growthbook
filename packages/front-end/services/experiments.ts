@@ -74,7 +74,11 @@ export function hasEnoughData(
 export function isSuspiciousUplift(
   baseline: SnapshotMetric,
   stats: SnapshotMetric,
-  metric: { maxPercentChange?: number },
+  metric: {
+    maxPercentChange?: number;
+    maxValueChange?: number;
+    useValue?: boolean;
+  },
   metricDefaults: MetricDefaults
 ): boolean {
   if (!baseline?.cr || !stats?.cr) return false;
@@ -82,13 +86,22 @@ export function isSuspiciousUplift(
   const maxPercentChange =
     metric.maxPercentChange ?? metricDefaults?.maxPercentageChange ?? 0;
 
-  return Math.abs(baseline.cr - stats.cr) / baseline.cr >= maxPercentChange;
+  const maxValueChange =
+    metric.maxValueChange ?? metricDefaults?.maxValueChange ?? 0;
+
+  return metric.useValue
+    ? baseline.cr - stats.cr >= maxValueChange
+    : Math.abs(baseline.cr - stats.cr) / baseline.cr >= maxPercentChange;
 }
 
 export function isBelowMinChange(
   baseline: SnapshotMetric,
   stats: SnapshotMetric,
-  metric: { minPercentChange?: number },
+  metric: {
+    minPercentChange?: number;
+    minValueChange?: number;
+    useValue?: boolean;
+  },
   metricDefaults: MetricDefaults
 ): boolean {
   if (!baseline?.cr || !stats?.cr) return false;
@@ -96,7 +109,12 @@ export function isBelowMinChange(
   const minPercentChange =
     metric.minPercentChange || metricDefaults.minPercentageChange;
 
-  // @ts-expect-error TS(2532) If you come across this, please fix it!: Object is possibly 'undefined'.
+  const minValueChange = metric.minValueChange || metricDefaults.minValueChange;
+
+  // @ts-expect-error TS(2532) 'minValueChange' may be undefined, handle this case appropriately
+  if (metric.useValue) return baseline.cr - stats.cr < minValueChange;
+
+  // @ts-expect-error TS(2532) 'minValueChange' or 'minPercentChange' may be undefined, handle this case appropriately
   return Math.abs(baseline.cr - stats.cr) / baseline.cr < minPercentChange;
 }
 
@@ -661,9 +679,13 @@ export function getRowResults({
     metricDefaults
   );
   const suspiciousChangeReason = suspiciousChange
-    ? `A suspicious result occurs when the percent change exceeds your maximum percent change (${percentFormatter.format(
-        metric.maxPercentChange ?? metricDefaults?.maxPercentageChange ?? 0
-      )}).`
+    ? metric.useValue
+      ? `A suspicious result occurs when the value change exceeds your maximum value change (${
+          metric.maxValueChange ?? metricDefaults?.maxValueChange ?? 0
+        }).`
+      : `A suspicious result occurs when the percent change exceeds your maximum percent change (${percentFormatter.format(
+          metric.maxPercentChange ?? metricDefaults?.maxPercentageChange ?? 0
+        )}).`
     : "";
 
   const belowMinChange = isBelowMinChange(
