@@ -35,6 +35,9 @@ export const DEFAULT_REUIRE_REVIEW = false;
 export const DEFAULT_METRIC_DEFAULTS: MetricDefaults = {
   maxPercentageChange: 0.5,
   minPercentageChange: 0.005,
+  minValueChange: 5,
+  maxValueChange: 50,
+  useValue: false,
   minimumSampleSize: 150,
   windowSettings: {
     type: DEFAULT_METRIC_WINDOW,

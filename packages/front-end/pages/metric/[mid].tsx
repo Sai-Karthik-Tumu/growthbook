@@ -119,6 +119,9 @@ const MetricPage: FC = () => {
     getMinSampleSizeForMetric,
     getMinPercentageChangeForMetric,
     getMaxPercentageChangeForMetric,
+    getMinValueChangeForMetric,
+    getMaxValueChangeForMetric,
+    getUseValueForMetric,
   } = useOrganizationMetricDefaults();
 
   const form = useForm<{ name: string; description: string }>();
@@ -1259,18 +1262,37 @@ const MetricPage: FC = () => {
                       {getMinSampleSizeForMetric(metric)}
                     </span>
                   </li>
-                  <li className="mb-2">
-                    <span className="text-gray">Max percent change:</span>{" "}
-                    <span className="font-weight-bold">
-                      {getMaxPercentageChangeForMetric(metric) * 100}%
-                    </span>
-                  </li>
-                  <li className="mb-2">
-                    <span className="text-gray">Min percent change :</span>{" "}
-                    <span className="font-weight-bold">
-                      {getMinPercentageChangeForMetric(metric) * 100}%
-                    </span>
-                  </li>
+                  {getUseValueForMetric(metric) ? (
+                    <>
+                      <li className="mb-2">
+                        <span className="text-gray">Min value change :</span>{" "}
+                        <span className="font-weight-bold">
+                          {getMinValueChangeForMetric(metric)}
+                        </span>
+                      </li>
+                      <li className="mb-2">
+                        <span className="text-gray">Max value change :</span>{" "}
+                        <span className="font-weight-bold">
+                          {getMaxValueChangeForMetric(metric)}
+                        </span>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li className="mb-2">
+                        <span className="text-gray">Max percent change:</span>{" "}
+                        <span className="font-weight-bold">
+                          {getMaxPercentageChangeForMetric(metric) * 100}%
+                        </span>
+                      </li>
+                      <li className="mb-2">
+                        <span className="text-gray">Min percent change :</span>{" "}
+                        <span className="font-weight-bold">
+                          {getMinPercentageChangeForMetric(metric) * 100}%
+                        </span>
+                      </li>
+                    </>
+                  )}
                 </ul>
               </RightRailSectionGroup>
 

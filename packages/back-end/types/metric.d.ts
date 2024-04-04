@@ -72,7 +72,7 @@ export interface MetricInterface {
   minPercentChange?: number;
   maxValueChange?: number;
   minValueChange?: number;
-  useValue: boolean;
+  useValue?: boolean;
   minSampleSize?: number;
 
   regressionAdjustmentOverride?: boolean;

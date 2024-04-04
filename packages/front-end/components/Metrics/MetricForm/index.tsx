@@ -258,6 +258,7 @@ const MetricForm: FC<MetricFormProps> = ({
     getMaxPercentageChangeForMetric,
     getMaxValueChangeForMetric,
     getMinValueChangeForMetric,
+    getUseValueForMetric,
     metricDefaults,
   } = useOrganizationMetricDefaults();
 
@@ -342,7 +343,7 @@ const MetricForm: FC<MetricFormProps> = ({
       minPercentChange: getMinPercentageChangeForMetric(current) * 100,
       minValueChange: getMinValueChangeForMetric(current),
       maxValueChange: getMaxValueChangeForMetric(current),
-      useValue: current.useValue || false,
+      useValue: getUseValueForMetric(current),
       minSampleSize: getMinSampleSizeForMetric(current),
       regressionAdjustmentOverride:
         current.regressionAdjustmentOverride ?? false,
@@ -386,7 +387,7 @@ const MetricForm: FC<MetricFormProps> = ({
     regressionAdjustmentOverride: form.watch("regressionAdjustmentOverride"),
     regressionAdjustmentEnabled: form.watch("regressionAdjustmentEnabled"),
     regressionAdjustmentDays: form.watch("regressionAdjustmentDays"),
-    useValue: useValue,
+    // useValue: form.watch("useValue"),
   };
 
   // We want to show a warning when someone tries to create a metric for just the demo project
@@ -530,6 +531,7 @@ const MetricForm: FC<MetricFormProps> = ({
     if (value.loseRisk < value.winRisk) return;
 
     const body = JSON.stringify(sendValue);
+    console.log("useValue: " + body);
 
     if (edit) {
       await apiCall(`/metric/${current.id}`, {
@@ -615,7 +617,7 @@ const MetricForm: FC<MetricFormProps> = ({
       />
     );
   }
-
+  console.log("useValue: " + useValue);
   return (
     <>
       {supportsSQL && sqlOpen && (

@@ -330,6 +330,8 @@ export interface components {
         riskThresholdDanger: number;
         minPercentChange: number;
         maxPercentChange: number;
+        minValueChange: number;
+        maxValueChange: number;
         minSampleSize: number;
       };
       sql?: {
@@ -3738,6 +3740,8 @@ export interface operations {
                   riskThresholdDanger: number;
                   minPercentChange: number;
                   maxPercentChange: number;
+                  minValueChange: number;
+                  maxValueChange: number;
                   minSampleSize: number;
                 };
                 sql?: {
@@ -3867,6 +3871,11 @@ export interface operations {
             minPercentChange?: number;
             /** @description Maximum percent change to consider uplift significant, as a proportion (e.g. put 0.5 for 50%) */
             maxPercentChange?: number;
+            /** @description Minimum value change to consider uplift significant */
+            minValueChange?: number;
+            /** @description Maximum value change to consider uplift significant */
+            maxValueChange?: number;
+
             minSampleSize?: number;
           };
           /** @description Preferred way to define SQL. Only one of `sql`, `sqlBuilder` or `mixpanel` allowed, and at least one must be specified. */
@@ -3968,6 +3977,8 @@ export interface operations {
                 riskThresholdDanger: number;
                 minPercentChange: number;
                 maxPercentChange: number;
+                minValueChange: number;
+                maxValueChange: number;
                 minSampleSize: number;
               };
               sql?: {
@@ -4075,6 +4086,8 @@ export interface operations {
                 riskThresholdDanger: number;
                 minPercentChange: number;
                 maxPercentChange: number;
+                minValueChange: number;
+                maxValueChange: number;
                 minSampleSize: number;
               };
               sql?: {
@@ -4201,6 +4214,11 @@ export interface operations {
             minPercentChange?: number;
             /** @description Maximum percent change to consider uplift significant, as a proportion (e.g. put 0.5 for 50%) */
             maxPercentChange?: number;
+            /** @description Minimum value change to consider uplift significant */
+            minValueChange?: number;
+            /** @description Maximum value change to consider uplift significant */
+            maxValueChange?: number;
+
             minSampleSize?: number;
           };
           /** @description Preferred way to define SQL. Only one of `sql`, `sqlBuilder` or `mixpanel` allowed. */

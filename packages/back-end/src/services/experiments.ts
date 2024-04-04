@@ -1013,15 +1013,30 @@ export function postMetricApiPayloadIsValid(
     }
 
     // Min/max percentage change
-    const { maxPercentChange, minPercentChange } = behavior;
+    const {
+      maxPercentChange,
+      minPercentChange,
+      minValueChange,
+      maxValueChange,
+    } = behavior;
     const maxPercentExists = typeof maxPercentChange !== "undefined";
     const minPercentExists = typeof minPercentChange !== "undefined";
+    const maxValueExists = typeof maxValueChange !== "undefined";
+    const minValueExists = typeof minValueChange !== "undefined";
+
     // Enforce both max/min percent or neither
     if (maxPercentExists !== minPercentExists)
       return {
         valid: false,
         error:
           "Must specify both `behavior.maxPercentChange` and `behavior.minPercentChange` or neither",
+      };
+
+    if (minValueExists !== maxValueExists)
+      return {
+        valid: false,
+        error:
+          "Must specify both `behavior.maxValueChange` and `behavior.minValueChange` or neither",
       };
 
     if (maxPercentExists && minPercentExists) {
@@ -1031,6 +1046,16 @@ export function postMetricApiPayloadIsValid(
           valid: false,
           error:
             "`behavior.maxPercentChange` must be greater than `behavior.minPercentChange`",
+        };
+    }
+
+    if (maxValueExists && minValueExists) {
+      // Enforce max is greater than min
+      if (maxValueChange <= minValueChange)
+        return {
+          valid: false,
+          error:
+            "`behavior.maxValueChange` must be greater than `behavior.minValueChange`",
         };
     }
 
@@ -1175,15 +1200,29 @@ export function putMetricApiPayloadIsValid(
     }
 
     // Min/max percentage change
-    const { maxPercentChange, minPercentChange } = behavior;
+    const {
+      maxPercentChange,
+      minPercentChange,
+      maxValueChange,
+      minValueChange,
+    } = behavior;
     const maxPercentExists = typeof maxPercentChange !== "undefined";
     const minPercentExists = typeof minPercentChange !== "undefined";
+    const maxValueExists = typeof maxValueChange !== "undefined";
+    const minValueExists = typeof minValueChange !== "undefined";
     // Enforce both max/min percent or neither
     if (maxPercentExists !== minPercentExists)
       return {
         valid: false,
         error:
           "Must specify both `behavior.maxPercentChange` and `behavior.minPercentChange` or neither",
+      };
+
+    if (maxValueExists !== minValueExists)
+      return {
+        valid: false,
+        error:
+          "Must specify both `behavior.maxValueChange` and `behavior.minValueChange` or neither",
       };
 
     if (maxPercentExists && minPercentExists) {
@@ -1193,6 +1232,16 @@ export function putMetricApiPayloadIsValid(
           valid: false,
           error:
             "`behavior.maxPercentChange` must be greater than `behavior.minPercentChange`",
+        };
+    }
+
+    if (maxValueExists && minValueExists) {
+      // Enforce max is greater than min
+      if (maxValueChange <= minValueChange)
+        return {
+          valid: false,
+          error:
+            "`behavior.maxValueChange` must be greater than `behavior.minValueChange`",
         };
     }
 
@@ -1281,7 +1330,10 @@ export function postMetricApiPayloadToMetricInterface(
     managedBy = "",
   } = payload;
 
-  const metric: Omit<MetricInterface, "dateCreated" | "dateUpdated" | "id"> = {
+  const metric: Omit<
+    MetricInterface,
+    "dateCreated" | "dateUpdated" | "id" | "useValue"
+  > = {
     datasource: datasourceId,
     description,
     managedBy,
@@ -1368,6 +1420,14 @@ export function postMetricApiPayloadToMetricInterface(
 
     if (typeof behavior.minPercentChange !== "undefined") {
       metric.minPercentChange = behavior.minPercentChange;
+    }
+
+    if (typeof behavior.maxValueChange !== "undefined") {
+      metric.maxValueChange = behavior.maxValueChange;
+    }
+
+    if (typeof behavior.minValueChange !== "undefined") {
+      metric.minValueChange = behavior.minValueChange;
     }
 
     if (typeof behavior.minSampleSize !== "undefined") {
@@ -1506,6 +1566,14 @@ export function putMetricApiPayloadToMetricInterface(
       metric.minPercentChange = behavior.minPercentChange;
     }
 
+    if (typeof behavior.maxValueChange !== "undefined") {
+      metric.maxValueChange = behavior.maxValueChange;
+    }
+
+    if (typeof behavior.minValueChange !== "undefined") {
+      metric.minValueChange = behavior.minValueChange;
+    }
+
     if (typeof behavior.minSampleSize !== "undefined") {
       metric.minSampleSize = behavior.minSampleSize;
     }
@@ -1626,6 +1694,10 @@ export function toMetricApiInterface(
       minPercentChange:
         metric.minPercentChange ?? metricDefaults?.minPercentageChange ?? 0.005,
       maxPercentChange:
+        metric.maxPercentChange ?? metricDefaults?.maxPercentageChange ?? 0.5,
+      minValueChange:
+        metric.minPercentChange ?? metricDefaults?.minPercentageChange ?? 0.005,
+      maxValueChange:
         metric.maxPercentChange ?? metricDefaults?.maxPercentageChange ?? 0.5,
       minSampleSize:
         metric.minSampleSize ?? metricDefaults?.minimumSampleSize ?? 150,

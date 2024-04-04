@@ -267,6 +267,94 @@ describe("experiments utils", () => {
       );
     });
 
+    it("should return a failed result when minValueChange provided but not maxValueChange", () => {
+      const datasource: Pick<DataSourceInterface, "type"> = {
+        type: "postgres",
+      };
+      const input: z.infer<typeof postMetricValidator.bodySchema> = {
+        datasourceId: "ds_abc123",
+        sql: {
+          identifierTypes: ["user_id"],
+          conversionSQL: "select * from foo",
+          userAggregationSQL: "sum(values)",
+        },
+        behavior: {
+          minValueChange: 5,
+        },
+        name: "My Cool Metric",
+        type: "count",
+      };
+
+      const result = postMetricApiPayloadIsValid(input, datasource) as {
+        valid: false;
+        error: string;
+      };
+
+      expect(result.valid).toBe(false);
+      expect(result.error).toEqual(
+        "Must specify both `behavior.maxValueChange` and `behavior.minValueChange` or neither"
+      );
+    });
+
+    it("should return a failed result when maxValueChange provided but not minValueChange", () => {
+      const datasource: Pick<DataSourceInterface, "type"> = {
+        type: "postgres",
+      };
+      const input: z.infer<typeof postMetricValidator.bodySchema> = {
+        datasourceId: "ds_abc123",
+        sql: {
+          identifierTypes: ["user_id"],
+          conversionSQL: "select * from foo",
+          userAggregationSQL: "sum(values)",
+        },
+        behavior: {
+          maxValueChange: 50,
+        },
+        name: "My Cool Metric",
+        type: "count",
+      };
+
+      const result = postMetricApiPayloadIsValid(input, datasource) as {
+        valid: false;
+        error: string;
+      };
+
+      expect(result.valid).toBe(false);
+      expect(result.error).toEqual(
+        "Must specify both `behavior.maxValueChange` and `behavior.minValueChange` or neither"
+      );
+    });
+
+    it("should return a failed result when maxValueChange is not greater than minValueChange", () => {
+      const datasource: Pick<DataSourceInterface, "type"> = {
+        type: "postgres",
+      };
+      const input: z.infer<typeof postMetricValidator.bodySchema> = {
+        datasourceId: "ds_abc123",
+        sql: {
+          identifierTypes: ["user_id"],
+          conversionSQL: "select * from foo",
+          userAggregationSQL: "sum(values)",
+        },
+        behavior: {
+          minValueChange: 50,
+          maxValueChange: 0.5,
+        },
+        name: "My Cool Metric",
+        type: "count",
+      };
+
+      const result = postMetricApiPayloadIsValid(input, datasource) as {
+        valid: false;
+        error: string;
+      };
+
+      expect(result.valid).toBe(false);
+      expect(result.error).toEqual(
+        "`behavior.maxValueChange` must be greater than `behavior.minValueChange`"
+      );
+    });
+
     it("should return a failed result if both risk threshold values are not provided", () => {
       const datasource: Pick<DataSourceInterface, "type"> = {
         type: "postgres",
@@ -596,6 +684,82 @@ describe("experiments utils", () => {
       );
     });
 
+    it("should return a failed result when minValueChange provided but not maxValueChange", () => {
+      const input: z.infer<typeof putMetricValidator.bodySchema> = {
+        sql: {
+          identifierTypes: ["user_id"],
+          conversionSQL: "select * from foo",
+          userAggregationSQL: "sum(values)",
+        },
+        behavior: {
+          minValueChange: 0.05,
+        },
+        name: "My Cool Metric",
+        type: "count",
+      };
+
+      const result = putMetricApiPayloadIsValid(input) as {
+        valid: false;
+        error: string;
+      };
+
+      expect(result.valid).toBe(false);
+      expect(result.error).toEqual(
+        "Must specify both `behavior.maxValueChange` and `behavior.minValueChange` or neither"
+      );
+    });
+
+    it("should return a failed result when maxValueChange provided but not minValueChange", () => {
+      const input: z.infer<typeof putMetricValidator.bodySchema> = {
+        sql: {
+          identifierTypes: ["user_id"],
+          conversionSQL: "select * from foo",
+          userAggregationSQL: "sum(values)",
+        },
+        behavior: {
+          maxValueChange: 0.5,
+        },
+        name: "My Cool Metric",
+        type: "count",
+      };
+
+      const result = putMetricApiPayloadIsValid(input) as {
+        valid: false;
+        error: string;
+      };
+
+      expect(result.valid).toBe(false);
+      expect(result.error).toEqual(
+        "Must specify both `behavior.maxValueChange` and `behavior.minValueChange` or neither"
+      );
+    });
+
+    it("should return a failed result when maxValueChange is not greater than minValueChange", () => {
+      const input: z.infer<typeof putMetricValidator.bodySchema> = {
+        sql: {
+          identifierTypes: ["user_id"],
+          conversionSQL: "select * from foo",
+          userAggregationSQL: "sum(values)",
+        },
+        behavior: {
+          minValueChange: 0.5,
+          maxValueChange: 0.005,
+        },
+        name: "My Cool Metric",
+        type: "count",
+      };
+
+      const result = putMetricApiPayloadIsValid(input) as {
+        valid: false;
+        error: string;
+      };
+
+      expect(result.valid).toBe(false);
+      expect(result.error).toEqual(
+        "`behavior.maxValueChange` must be greater than `behavior.minValueChange`"
+      );
+    });
+
     it("should return a failed result if both risk threshold values are not provided", () => {
       const input: z.infer<typeof putMetricValidator.bodySchema> = {
         sql: {
@@ -773,6 +937,9 @@ describe("experiments utils", () => {
             riskThresholdDanger: 0.5,
             minPercentChange: 1,
             maxPercentChange: 50,
+            minValueChange: 1,
+            maxValueChange: 50,
+            // useValue: true, uncomment this after adding useValue in behavior
             minSampleSize: 200,
           },
           name: "My Cool Metric",
@@ -817,6 +984,9 @@ describe("experiments utils", () => {
         expect(result.loseRisk).toEqual(0.5);
         expect(result.minPercentChange).toEqual(1);
         expect(result.maxPercentChange).toEqual(50);
+        expect(result.minValueChange).toEqual(1);
+        expect(result.maxValueChange).toEqual(50);
+        // expect(result.useValue).toEqual(true); uncomment after adding useValue in behavior
         expect(result.minSampleSize).toEqual(200);
         expect(result.cappingSettings.type).toEqual("");
         expect(result.cappingSettings.value).toEqual(0);
@@ -859,6 +1029,9 @@ describe("experiments utils", () => {
             riskThresholdDanger: 0.5,
             minPercentChange: 1,
             maxPercentChange: 50,
+            minValueChange: 1,
+            maxValueChange: 50,
+            // useValue: true, uncomment after adding useValue in behavior
             minSampleSize: 200,
           },
           name: "My Cool Metric",
@@ -1004,6 +1177,9 @@ describe("putMetricApiPayloadToMetricInterface", () => {
           riskThresholdDanger: 0.5,
           minPercentChange: 1,
           maxPercentChange: 50,
+          minValueChange: 1,
+          maxValueChange: 50,
+          // useValue: true, uncomment after adding useValue in behavior
           minSampleSize: 200,
         },
         name: "My Updated Metric",
@@ -1044,6 +1220,9 @@ describe("putMetricApiPayloadToMetricInterface", () => {
       expect(result.loseRisk).toEqual(0.5);
       expect(result.minPercentChange).toEqual(1);
       expect(result.maxPercentChange).toEqual(50);
+      expect(result.minValueChange).toEqual(1);
+      expect(result.maxValueChange).toEqual(50);
+      // expect(result.useValue).toEqual(true); uncomment after adding useValue in behavior
       expect(result.minSampleSize).toEqual(200);
       expect(result.cappingSettings?.type).toEqual("absolute");
       expect(result.cappingSettings?.value).toEqual(1337);

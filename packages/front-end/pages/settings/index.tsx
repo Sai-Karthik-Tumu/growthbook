@@ -89,6 +89,9 @@ const GeneralSettingsPage = (): React.ReactElement => {
         minimumSampleSize: metricDefaults.minimumSampleSize,
         maxPercentageChange: metricDefaults.maxPercentageChange * 100,
         minPercentageChange: metricDefaults.minPercentageChange * 100,
+        maxValueChange: metricDefaults.maxValueChange,
+        minValueChange: metricDefaults.minValueChange,
+        useValue: metricDefaults.useValue,
       },
       updateSchedule: {
         type: "stale",
@@ -129,6 +132,9 @@ const GeneralSettingsPage = (): React.ReactElement => {
       minimumSampleSize: form.watch("metricDefaults.minimumSampleSize"),
       maxPercentageChange: form.watch("metricDefaults.maxPercentageChange"),
       minPercentageChange: form.watch("metricDefaults.minPercentageChange"),
+      maxValueChange: form.watch("metricDefaults.maxValueChange"),
+      minValueChange: form.watch("metricDefaults.minValueChange"),
+      useValue: form.watch("metricDefaults.useValue"),
     },
     // customization:
     customized: form.watch("customized"),
@@ -191,6 +197,9 @@ const GeneralSettingsPage = (): React.ReactElement => {
               newVal.metricDefaults.maxPercentageChange * 100,
             minPercentageChange:
               newVal.metricDefaults.minPercentageChange * 100,
+            maxValueChange: newVal.metricDefaults.maxValueChange,
+            minValueChange: newVal.metricDefaults.minValueChange,
+            useValue: newVal.metricDefaults.useValue,
           };
         }
         if (k === "confidenceLevel" && (newVal?.confidenceLevel ?? 0.95) <= 1) {
@@ -240,6 +249,9 @@ const GeneralSettingsPage = (): React.ReactElement => {
         ...value.metricDefaults,
         maxPercentageChange: value.metricDefaults.maxPercentageChange / 100,
         minPercentageChange: value.metricDefaults.minPercentageChange / 100,
+        maxValueChange: value.metricDefaults.maxValueChange,
+        minValueChange: value.metricDefaults.minValueChange,
+        useValue: value.metricDefaults.useValue,
       },
       confidenceLevel: (value.confidenceLevel ?? 0.95) / 100,
       multipleExposureMinPercent:

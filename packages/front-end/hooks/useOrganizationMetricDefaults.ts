@@ -18,6 +18,7 @@ const defaultMinPercentChange = 0.005;
 const defaultMaxValueChange = 50;
 const defaultMinValueChange = 0.5;
 const defaultMinSampleSize = 150;
+const defaultUseValue = false;
 
 const defaultMetricWindowSettings: MetricWindowSettings = {
   type: DEFAULT_METRIC_WINDOW,
@@ -36,6 +37,7 @@ const METRIC_DEFAULTS = {
   minPercentageChange: defaultMinPercentChange,
   maxValueChange: defaultMaxValueChange,
   minValueChange: defaultMinValueChange,
+  useValue: defaultUseValue,
   windowSettings: defaultMetricWindowSettings,
   cappingSettings: defaultMetricCappingSettings,
 };
@@ -57,6 +59,7 @@ type OrganizationMetricDefaults = {
     minPercentageChange: number;
     maxValueChange: number;
     minValueChange: number;
+    useValue: boolean;
     windowSettings: MetricWindowSettings;
     cappingSettings: MetricCappingSettings;
   };
@@ -86,7 +89,7 @@ type OrganizationMetricDefaults = {
   }) => number;
 
   /**
-   * Returns the max percentage change for the provided metric,
+   * Returns the max value change for the provided metric,
    * considering 0 (zero) as a valid value.
    * @param metric
    * @return number
@@ -100,6 +103,13 @@ type OrganizationMetricDefaults = {
    * @return number
    */
   getMinValueChangeForMetric: (metric: { minValueChange?: number }) => number;
+
+  /**
+   * Returns the flag "useValue" which determines whether to apply value or percentage capping for the provided metric,
+   * @param metric
+   * @return boolean
+   */
+  getUseValueForMetric: (metric: { useValue?: boolean }) => boolean;
 
   /**
    * Returns the minimum sample size for the provided metric,
@@ -120,6 +130,7 @@ export type OrganizationSettingsWithMetricDefaults = Omit<
     minPercentageChange: number;
     maxValueChange: number;
     minValueChange: number;
+    useValue: boolean;
     windowSettings: MetricWindowSettings;
     cappingSettings: MetricCappingSettings;
   };
@@ -179,6 +190,19 @@ export const useOrganizationMetricDefaults = (): OrganizationMetricDefaults => {
   );
 
   /**
+   * @link OrganizationMetricDefaults#getUseValueForMetric
+   */
+  const getUseValueForMetric = useCallback(
+    (metric: { useValue?: boolean }): boolean => {
+      const value = metric.useValue;
+      if (typeof value === "boolean") return value;
+
+      return metricDefaults.useValue;
+    },
+    [metricDefaults]
+  );
+
+  /**
    * @link OrganizationMetricDefaults#getMinValueChangeForMetric
    */
   const getMinValueChangeForMetric = useCallback(
@@ -210,6 +234,7 @@ export const useOrganizationMetricDefaults = (): OrganizationMetricDefaults => {
     getMaxPercentageChangeForMetric,
     getMaxValueChangeForMetric,
     getMinValueChangeForMetric,
+    getUseValueForMetric,
     getMinSampleSizeForMetric,
   };
 };
