@@ -15,6 +15,7 @@ import {
 import { ago, date, datetime } from "shared/dates";
 import {
   autoMerge,
+  checkIfRevisionNeedsReview,
   evaluatePrerequisiteState,
   filterEnvironmentsByFeature,
   getValidation,
@@ -28,6 +29,7 @@ import { ExperimentInterfaceStringDates } from "back-end/types/experiment";
 import clsx from "clsx";
 import Link from "next/link";
 import { BsClock } from "react-icons/bs";
+import { PiCheckCircleFill, PiCircleDuotone, PiFileX } from "react-icons/pi";
 import { GBAddCircle, GBEdit } from "@/components/Icons";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { useAuth } from "@/services/auth";
@@ -118,7 +120,6 @@ export default function FeaturesOverview({
   const { fid } = router.query;
 
   const settings = useOrgSettings();
-
   const [edit, setEdit] = useState(false);
   const [editValidator, setEditValidator] = useState(false);
   const [showSchema, setShowSchema] = useState(false);
@@ -227,7 +228,19 @@ export default function FeaturesOverview({
   const { jsonSchema, validationEnabled, schemaDateUpdated } = getValidation(
     feature
   );
-  const requireReviews = !!settings?.requireReviews;
+  const baseVersion = revision?.baseVersion || feature.version;
+  const baseRevision = revisions.find((r) => r.version === baseVersion);
+  let requireReviews = false;
+  //dont require review when we cant find a base version to compare
+  if (baseRevision) {
+    requireReviews = checkIfRevisionNeedsReview({
+      feature,
+      baseRevision,
+      revision,
+      allEnvironments: environments.map((e) => e.id),
+      settings,
+    });
+  }
   const isLive = revision?.version === feature.version;
   const isPendingReview =
     revision?.status === "pending-review" ||
@@ -291,11 +304,36 @@ export default function FeaturesOverview({
     "createFeatureDrafts",
     feature.project
   );
+  const renderStatusCopy = () => {
+    switch (revision.status) {
+      case "approved":
+        return (
+          <span className="mr-3">
+            <PiCheckCircleFill className="text-success  mr-1" /> Approved
+          </span>
+        );
+      case "pending-review":
+        return (
+          <span className="mr-3">
+            <PiCircleDuotone className="text-warning  mr-1" /> Pending Review
+          </span>
+        );
+      case "changes-requested":
+        return (
+          <span className="mr-3">
+            <PiFileX className="text-danger mr-1" />
+            Changes Requested
+          </span>
+        );
+      default:
+        return;
+    }
+  };
   const renderDraftBannerCopy = () => {
     if (isPendingReview) {
       return (
         <>
-          <BsClock /> Awaiting Approval
+          <BsClock /> Review and Approve
         </>
       );
     }
@@ -992,6 +1030,7 @@ export default function FeaturesOverview({
                 </div>
               )}
               <div className="col-auto">
+                {renderStatusCopy()}
                 <a
                   href="#"
                   onClick={(e) => {
